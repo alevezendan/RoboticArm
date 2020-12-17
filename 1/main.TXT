@@ -1,0 +1,315 @@
+//
+//  main.cpp
+//  OpenGL_Shader_Example_step1
+//
+//  Created by CGIS on 30/11/15.
+//  Copyright © 2015 CGIS. All rights reserved.
+//
+
+#define GLEW_STATIC
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+
+#include "OpenGL lib directory/include/GL/glew.h"
+#include "OpenGL lib directory/include/GLFW/glfw3.h"
+
+int glWindowWidth = 640;
+int glWindowHeight = 480;
+int retina_width, retina_height;
+GLFWwindow* glWindow = NULL;
+
+GLuint shaderProgram;
+/*GLfloat vertexCoordinates1[] = {
+ 0.3f, -0.2f, 0.0f,
+ 0.3f, -0.3f, 0.0f,
+ -0.3f, -0.3f, 0.0f,
+ -0.3f, -0.2f, 0.0f,
+ -0.3f, -0.3f, 0.0f,
+ 0.3f, -0.2f, 0.0f,
+ 0.33f,-0.2f,0.0f,
+ 0.6f,0.3f,0.0f,
+ 0.67f,0.27f,0.0f,
+ 0.33f,-0.2f,0.0f,
+ 0.4f,-0.23f,0.0f,
+ 0.67f,0.27f,0.0f,
+ 0.6f,0.33f,0.0f,
+ 0.67f,0.3f,0.0f,
+ 0.6f,0.50f,0.0f,
+ 0.6f,0.5f,0.0f,
+ 0.67f,0.3f,0.0f,
+ 0.67f,0.47f,0.0f
+};*/
+GLfloat vertexCoordinates1[] = {
+ -0.3f, -0.2f, 0.0f,        //A
+ 0.3f, -0.2f, 0.0f,         //B
+ -0.25f, -0.28f, 0.0f,      //C
+ -0.25f, -0.28f, 0.0f,      //C
+ 0.35f, -0.28f, 0.0f,       //D
+ 0.3f, -0.2f, 0.0f,         //B
+
+
+ 0.33f,-0.2f,0.0f,              //A
+ 0.6f,0.3f,0.0f,                //B
+ 0.67f,0.25f,0.0f,              //C
+ 0.33f,-0.2f,0.0f,              //A 
+ 0.38f,-0.28f,0.0f,             //D
+ 0.67f,0.25f,0.0f,              //C
+
+
+ 0.6f,0.33f,0.0f,        //A
+ 0.67f,0.28f,0.0f,       //B
+ 0.6f,0.50f,0.0f,        //C
+ 0.6f,0.5f,0.0f,         //C
+ 0.67f,0.28f,0.0f,       //B
+ 0.67f,0.45f,0.0f        //D
+};
+GLfloat vertexCoordinates2[] = {
+ -0.2f, 0.2f, 0.0f,
+ -0.2f, -0.2f, 0.0f,
+ 0.2f, 0.2f, 0.0f
+};
+
+GLuint vertices1VBO;
+GLuint triangle1VAO;
+GLuint vertices2VBO;
+GLuint triangle2VAO; 
+//3 matrici model
+//matr view,projection
+void windowResizeCallback(GLFWwindow* window, int width, int height)
+{
+	fprintf(stdout, "window resized to width: %d , and height: %d\n", width, height);
+	//TODO
+}
+
+void initObjects()
+{
+	//genereaza un ID unic pentru verticesVBO
+	glGenBuffers(1, &vertices1VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, vertices1VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexCoordinates1), vertexCoordinates1, GL_STATIC_DRAW);
+
+	//genereaza un ID unic, care corespunde obiectului triangleVAO
+	glGenVertexArrays(1, &triangle1VAO);
+	glBindVertexArray(triangle1VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, vertices1VBO);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glVertexAttribPointer(6, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glVertexAttribPointer(9, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glVertexAttribPointer(12, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glVertexAttribPointer(15, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	
+	
+	glEnableVertexAttribArray(0);
+	glBindVertexArray(0);
+
+
+	
+
+	
+}
+
+bool initOpenGLWindow()
+{
+	if (!glfwInit()) {
+		fprintf(stderr, "ERROR: could not start GLFW3\n");
+		return false;
+	}
+
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	// for multisampling/antialising
+	glfwWindowHint(GLFW_SAMPLES, 4);
+
+	glWindow = glfwCreateWindow(glWindowWidth, glWindowHeight, "OpenGL Shader Example", NULL, NULL);
+	if (!glWindow) {
+		fprintf(stderr, "ERROR: could not open window with GLFW3\n");
+		glfwTerminate();
+		return false;
+	}
+
+	glfwSetWindowSizeCallback(glWindow, windowResizeCallback);
+	glfwMakeContextCurrent(glWindow);
+
+	// start GLEW extension handler
+	glewExperimental = GL_TRUE;
+	glewInit();
+
+	// get version info
+	const GLubyte* renderer = glGetString(GL_RENDERER); // get renderer string
+	const GLubyte* version = glGetString(GL_VERSION); // version as a string
+	printf("Renderer: %s\n", renderer);
+	printf("OpenGL version supported %s\n", version);
+
+	//for RETINA display
+	glfwGetFramebufferSize(glWindow, &retina_width, &retina_height);
+
+	return true;
+}
+float angle = 0.0f;
+void renderScene()
+{
+	//initializeaza buffer-ele de culoare si adancime inainte de a rasteriza cadrul curent
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//defineste culoarea de fundal
+	glClearColor(0.8, 0.8, 0.8, 1.0);
+	//specifica locatia si dimensiunea ferestrei
+	glViewport(0, 0, retina_width, retina_height);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
+
+	//proceseaza evenimentele de la tastatura
+	if (glfwGetKey(glWindow, GLFW_KEY_A)) {
+		angle += 0.01;
+		
+
+	}
+
+	if (glfwGetKey(glWindow, GLFW_KEY_D)) {
+		//TODO
+	}
+
+	//activeaza program shader-ul; apeluri ulterioare de rasterizare vor utiliza acest program
+	glUseProgram(shaderProgram);
+
+	//activeaza VAO
+	glBindVertexArray(triangle1VAO);
+	//glBindVertexArray(triangle2VAO);
+	//specifica tipul primitiei, indicele de inceput si numarul de indici utilizati pentru rasterizare
+	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawArrays(GL_TRIANGLES, 3, 6);
+	glDrawArrays(GL_TRIANGLES, 6, 9);
+	glDrawArrays(GL_TRIANGLES, 9, 12);
+
+}
+
+std::string readShaderFile(std::string fileName)
+{
+	std::ifstream shaderFile;
+	std::string shaderString;
+
+	//open shader file
+	shaderFile.open(fileName);
+
+	std::stringstream shaderStringStream;
+
+	//read shader content into stream
+	shaderStringStream << shaderFile.rdbuf();
+
+	//close shader file
+	shaderFile.close();
+
+	//convert stream into GLchar array
+	shaderString = shaderStringStream.str();
+	return shaderString;
+}
+
+void shaderCompileLog(GLuint shaderId)
+{
+	GLint success;
+	GLchar infoLog[512];
+
+	//check compilation info
+	glGetShaderiv(shaderId, GL_COMPILE_STATUS, &success);
+	if (!success)
+	{
+		glGetShaderInfoLog(shaderId, 512, NULL, infoLog);
+		std::cout << "Shader compilation error\n" << infoLog << std::endl;
+	}
+}
+
+void shaderLinkLog(GLuint shaderProgramId)
+{
+	GLint success;
+	GLchar infoLog[512];
+
+	//check linking info
+	glGetProgramiv(shaderProgramId, GL_LINK_STATUS, &success);
+	if (!success) {
+		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+		std::cout << "Shader linking error\n" << infoLog << std::endl;
+	}
+}
+
+GLuint initBasicShader(std::string vertexShaderFileName, std::string fragmentShaderFileName)
+{
+	GLuint shaderProgram;
+
+	//read, parse and compile the vertex shader
+	std::string v = readShaderFile(vertexShaderFileName);
+	const GLchar* vertexShaderString = v.c_str();
+	GLuint vertexShader;
+	vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertexShader, 1, &vertexShaderString, NULL);
+	glCompileShader(vertexShader);
+	//check compilation status
+	shaderCompileLog(vertexShader);
+
+	//read, parse and compile the fragment shader
+	std::string f = readShaderFile(fragmentShaderFileName);
+	const GLchar* fragmentShaderString = f.c_str();
+	GLuint fragmentShader;
+	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragmentShader, 1, &fragmentShaderString, NULL);
+	glCompileShader(fragmentShader);
+	//check compilation status
+	shaderCompileLog(fragmentShader);
+
+	//attach and link the shader programs
+	shaderProgram = glCreateProgram();
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
+	glLinkProgram(shaderProgram);
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
+	//check linking info
+	shaderLinkLog(shaderProgram);
+
+	return shaderProgram;
+}
+
+void cleanup() {
+	glfwDestroyWindow(glWindow);
+	//close GL context and any other GLFW resources
+	glfwTerminate();
+}
+
+int main(int argc, const char* argv[]) {
+
+	if (!initOpenGLWindow()) {
+		glfwTerminate();
+		return 1;
+	}
+
+	initObjects();
+
+	shaderProgram = initBasicShader("shaders/shader.vert", "shaders/shader.frag");
+
+	while (!glfwWindowShouldClose(glWindow)) {
+		renderScene();
+
+		glfwPollEvents();
+		glfwSwapBuffers(glWindow);
+	}
+
+	cleanup();
+
+	GLfloat vertices[] = { -1, -1, 0, // bottom left corner
+					  -1,  1, 0, // top left corner
+					   1,  1, 0, // top right corner
+					   1, -1, 0 }; // bottom right corner
+
+	GLubyte indices[] = { 0,1,2, // first triangle (bottom left - top left - top right)
+						 0,2,3 }; // second triangle (bottom left - top right - bottom right)
+
+	glVertexPointer(3, GL_FLOAT, 0, vertices);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, indices);
+
+	return 0;
+}
