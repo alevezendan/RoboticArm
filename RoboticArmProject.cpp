@@ -454,10 +454,9 @@ void renderScene(double a1,double a2, double a3) {
 	}
 	glPushMatrix();
 	glTranslatef(20.0f, 20.0f, 0.0f);
-	//untitled.Draw(myCustomShader);
+
 	glPopMatrix();
-	//forearm.Draw(myCustomShader);
-	//hand.Draw(myCustomShader);
+
 }
 
 void cleanup() {
@@ -487,73 +486,16 @@ int main(array<System::String^>^ args)
 	port.Open();
 	int cnt = 0;
 	while (!glfwWindowShouldClose(glWindow)) {
-		processMovement();
-		
+		processMovement();		
 		String^ data = port.ReadLine();
-		
 		char * ar[3];
 		array<String^>^ StringArray = data->Split(';');
-		//Console::WriteLine(StringArray[0]);
-		//Console::WriteLine(StringArray[1]);
-		//Console::WriteLine(StringArray[2]);
 		double a1 = System::Convert::ToDouble(StringArray[0]);
 		double a2 = System::Convert::ToDouble(StringArray[1]);
 		double a3 = System::Convert::ToDouble(StringArray[2]);
 		printf("%f %f %f\n", a1, a2, a3);
 		renderScene(a1, a2, a3);
-		
-		/*for each (String ^ temp in StringArray) {
-			Console::WriteLine(temp);
-			Console::WriteLine(cnt);
-			
-			cnt++;
-		}*/
-		//cnt = 0;
-		/*double arr[3];
-		double a1 = System::Convert::ToDouble(StringArray[0]);
-		array<String^>^ StringArray1 = StringArray[0]->Split('\n');
-		double a2 = System::Convert::ToDouble(StringArray1[0]);
-		//printf("%f\n",a1 );
-		printf("%d\n", a2);
-		//array<String^>^ StringArray2 = str->Split(id);
-		/*for each (String ^ temp in StringArray) {
-			Console::WriteLine(temp);
-			//printf("%d\n", cnt);
-			//printf("%s", temp->ToString());
-			double dou = System::Convert::ToDouble(temp);
-			//printf("%f\n", dou);
-			arr[cnt++] = dou;
-			//printf("%d\n", cnt);
-		}
-		cnt = 0;
-		
-		double a2 = arr[1];
-		double a3 = arr[2];*/
-		//printf("%f %f %f\n", a1, a2, a3);
-		//printf("%f\n", arr[0]);
-		//printf("%f\n", arr[1]);
-		if (data->Length == 0) {
-			Console::WriteLine("sdvdsv");
-
-		}
-		else
-		{
-			//printf("%s\n",data->ToString());
-			//Console::WriteLine(data);
-			
-			
-				
-
-			//String[] sub=data.Split("(\n");
-			//Console::WriteLine(data[2]);
-			//Console::WriteLine(data[3]);
-			
-
-		}
 		drawObjects(myCustomShader, true,a1,a2,a3);
-		//while (true) {
-			
-		//}
 		glfwPollEvents();
 		glfwSwapBuffers(glWindow);
 	}
