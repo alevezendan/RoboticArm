@@ -1,3 +1,4 @@
+#include"pch.h"
 #include "Camera.hpp"
 
 namespace gps {

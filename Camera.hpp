@@ -1,9 +1,9 @@
 #ifndef Camera_hpp
 #define Camera_hpp
 
-#include "OpenGL lib directory/include/glm/glm/glm.hpp"
-#include "OpenGL lib directory/include/glm/glm/gtx/transform.hpp"
-
+#include "glm/glm/glm.hpp"
+#include "glm/glm/gtx/transform.hpp"
+#include"pch.h"
 
 #include <string>
 

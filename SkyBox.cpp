@@ -5,7 +5,7 @@
 //  Created by CGIS on 16/12/2016.
 //  Copyright © 2016 CGIS. All rights reserved.
 //
-
+#include"pch.h"
 #include "SkyBox.hpp"
 
 namespace gps {
@@ -14,7 +14,7 @@ namespace gps {
     {
         
     }
-    
+    /*
     void SkyBox::Load(std::vector<const GLchar*> cubeMapFaces)
     {
         cubemapTexture = LoadSkyBoxTextures(cubeMapFaces);
@@ -138,4 +138,5 @@ namespace gps {
     {
         return cubemapTexture;
     }
+    */
 }

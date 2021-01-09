@@ -1,0 +1,7 @@
+﻿  pch.cpp
+  AssemblyInfo.cpp
+  RoboticArmProject.cpp
+  Generating Code...
+  .NETFramework,Version=v4.6.1.AssemblyAttributes.cpp
+  AssemblyInfo.obj : MSIL module encountered; incremental linking is disabled for MSIL; performing full link
+  RoboticArmProject.vcxproj -> C:\Ale\AN3\PMP\RoboticArmProject\Debug\RoboticArmProject.exe

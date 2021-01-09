@@ -1,4 +1,6 @@
+#include"pch.h"
 #include "Mesh.hpp"
+
 namespace gps {
 
 	/* Mesh Constructor */
@@ -11,7 +13,7 @@ namespace gps {
 		this->setupMesh();
 	}
 
-	Buffers Mesh::getBuffers() {
+	Buffers gps::Mesh::getBuffers() {
 	    return this->buffers;
 	}
 

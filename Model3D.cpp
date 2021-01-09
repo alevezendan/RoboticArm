@@ -1,14 +1,27 @@
+//
+//  Model3D.cpp
+//  Lab5
+//
+//  Created by CGIS on 28/10/2016.
+//  Copyright © 2016 CGIS. All rights reserved.
+//
+#include"pch.h"
 #include "Model3D.hpp"
 
+#define assimp
 namespace gps {
-
-	void Model3D::LoadModel(std::string fileName)
+#ifndef assimp
+	Model3D::Model3D()
 	{
-        std::string basePath = fileName.substr(0, fileName.find_last_of('/')) + "/";
-		ReadOBJ(fileName, basePath);
+
 	}
 
-    void Model3D::LoadModel(std::string fileName, std::string basePath)
+	Model3D::Model3D(std::string fileName)
+	{
+		ReadOBJ(fileName, NULL);
+	}
+
+	Model3D::Model3D(std::string fileName, std::string basePath)
 	{
 		ReadOBJ(fileName, basePath);
 	}
@@ -23,7 +36,6 @@ namespace gps {
 	// Does the parsing of the .obj file and fills in the data structure
 	void Model3D::ReadOBJ(std::string fileName, std::string basePath){
 
-        std::cout << "Loading : " << fileName << std::endl;
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> materials;
@@ -146,7 +158,7 @@ namespace gps {
 					return loadedTextures[i];
 				}
 			}
-
+			std::cout << path << std::endl;
 			gps::Texture currentTexture;
 			currentTexture.id = ReadTextureFromFile(path.c_str());
 			currentTexture.type = std::string(type);
@@ -215,19 +227,122 @@ namespace gps {
 
 		return textureID;
 	}
+#else
+	Model3D::Model3D() {
 
-	Model3D::~Model3D() {
-        for (size_t i = 0; i < loadedTextures.size(); i++) {
-            glDeleteTextures(1, &loadedTextures.at(i).id);
-        }
-
-        for (size_t i = 0; i < meshes.size(); i++) {
-            GLuint VBO = meshes.at(i).getBuffers().VBO;
-            GLuint EBO = meshes.at(i).getBuffers().EBO;
-            GLuint VAO = meshes.at(i).getBuffers().VAO;
-            glDeleteBuffers(1, &VBO);
-            glDeleteBuffers(1, &EBO);
-            glDeleteVertexArrays(1, &VAO);
-        }
 	}
+	Model3D::Model3D(std::string filename, std::string basePath)
+	{
+		std::cout << filename << " Opened" << std::endl;
+		loadObject(filename,basePath);
+		
+	}
+	Model3D::Model3D(std::string fileName)
+	{
+		std::cout << fileName << " Opened" << std::endl;
+		loadObject(fileName,"");
+	}
+	void Model3D::Draw(gps::Shader shader) {
+		for (int i = 0; i < meshes.size(); i++)
+			meshes.at(i).Draw(shader);
+	}
+
+	void Model3D::loadObject(std::string fileName, std::string basePath)
+	{
+		Assimp::Importer importer;
+		const aiScene *scene = importer.ReadFile(fileName, aiProcess_Triangulate | aiProcess_FlipUVs);
+
+
+		if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+		{
+			std::cout<<"Can not open the object file";
+			exit(0);
+		}
+		this->directory = basePath;
+		
+		this->processNode(scene->mRootNode, scene);
+	}
+
+	void Model3D::processNode(aiNode* node, const aiScene *scene) {
+		for(int i=0;i<node->mNumMeshes;i++)
+		{
+			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+
+			Mesh newMesh = this->processMesh(mesh,scene);
+			meshes.push_back(newMesh);
+		}
+		for (int i = 0; i < node->mNumChildren; i++)
+		{
+			this->processNode(node->mChildren[i], scene);
+		}
+	}
+	Mesh Model3D::processMesh(aiMesh *mesh,const aiScene* scene) {
+		std::vector<gps::Vertex> vertices;
+		std::vector<GLuint> indices;
+		std::vector<gps::Texture> textures;
+
+		//Vertex and normals,textures
+		for (int i = 0;i < mesh->mNumVertices; i++)
+		{
+			gps::Vertex position;
+			glm::vec3 vect;
+
+			vect.x = mesh->mVertices[i].x;
+			vect.y = mesh->mVertices[i].y;
+			vect.z = mesh->mVertices[i].z;
+		
+			position.Position = vect;
+
+			vect.x = mesh->mNormals[i].x;
+			vect.y = mesh->mNormals[i].y;
+			vect.z = mesh->mNormals[i].z;
+
+			position.Normal = vect;
+
+			if (mesh->mTextureCoords[0])
+			{
+				glm::vec2 text;
+
+				text.x = mesh->mTextureCoords[0][i].x;
+				text.y = mesh->mTextureCoords[0][i].y;
+
+				position.TexCoords = text;
+			}
+			else {
+				position.TexCoords = glm::vec2(0.0f);
+			}
+
+			vertices.push_back(position);
+
+		}
+
+		//Indices
+		for (int i = 0; i < mesh->mNumFaces; i++)
+		{
+			aiFace face = mesh->mFaces[i];
+			for (int j = 0; j < face.mNumIndices; j++)
+			{
+				indices.push_back(face.mIndices[j]);
+			}
+		}
+
+		std::cout << "Indices: " << indices.size()<<std::endl;
+		//Materials
+		if (mesh->mMaterialIndex >= 0)
+		{
+			std::cout << "Materials"<<std::endl;
+			aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+			std::vector<Texture> diffuseTexture = std::vector<Texture>();
+			textures.insert(textures.end(), diffuseTexture.begin(), diffuseTexture.end());
+			std::vector<Texture> specularTexture = std::vector<Texture>();
+			
+			textures.insert(textures.end() ,specularTexture.begin(),specularTexture.end());
+		}
+		return Mesh(vertices,indices,textures);
+	}
+
+
+	
+	
+#endif
 }
